@@ -80,7 +80,7 @@ public class AdminPanel extends JFrame{
         countUsersButton.addActionListener(e -> {countUsers();});
 
         addGroupButton.addActionListener(e -> {newGroupName = addGroupTextArea.getText();
-        if(isAlphNum(newGroupName)){addUser(newGroupName);}else{errorMessage = "Group name must be an alphanumeric string with a length of at least one."; JOptionPane.showMessageDialog(new JFrame(), errorMessage, "Error with Group Name", JOptionPane.ERROR_MESSAGE);}});
+        if(isAlphNum(newGroupName)){addGroup(newGroupName);}else{errorMessage = "Group name must be an alphanumeric string with a length of at least one."; JOptionPane.showMessageDialog(new JFrame(), errorMessage, "Error with Group Name", JOptionPane.ERROR_MESSAGE);}});
 
         addUserButton.addActionListener(e -> {newUserName = addUserTextArea.getText();
         if(isAlphNum(newUserName)){addUser(newUserName);}else{errorMessage = "Username must be an alphanumeric string with a length of at least one."; JOptionPane.showMessageDialog(new JFrame(), errorMessage, "Error with Username", JOptionPane.ERROR_MESSAGE);}});
