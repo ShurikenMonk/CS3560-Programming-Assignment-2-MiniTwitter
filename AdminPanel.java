@@ -108,14 +108,14 @@ public class AdminPanel extends JFrame{
 
         double posCount = 0;
 
+        for(User user : userSet){
+            XSet.addAll(user.getPersonalFeed().getXMap().values());
+        }
+
         for(X xMessage : XSet){
             if(xMessage.accept(visitor)){
                 posCount++;
             }
-        }
-
-        for(User user : userSet){
-            XSet.addAll(user.getPersonalFeed().getXMap().values());
         }
 
         posCount /= XSet.size();
