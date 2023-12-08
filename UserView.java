@@ -3,12 +3,14 @@ import java.util.HashMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class UserView extends JFrame{
+    /**Singleton Pattern */
     private User userInstance;
 
     private JTextArea followUserTextArea;
@@ -30,9 +32,14 @@ public class UserView extends JFrame{
     private String xContent;
     private String errorMessage;
 
+    private JLabel creationTimeLabel;
+    private JLabel lastUpdateTimeLabel;
+    private JLabel lastUpdateTimeNumberLabel;
+
     private static final int SCREEN_WIDTH = 750;
     private static final int SCREEN_HEIGHT = 550;
 
+    /**Singleton Pattern */
     public UserView(User user){
         userInstance = user;
         initComponents();
@@ -42,6 +49,7 @@ public class UserView extends JFrame{
         setButtons();
         setTextAreas();
         setLists();
+        setLabels();
         setTitle("User View - " + userInstance.toString());
         setLayout(null);
         setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -94,12 +102,14 @@ public class UserView extends JFrame{
         updateNewsFeed();
     }
 
+    /**Singleton Pattern */
     public void updateFollowing(){
         for (User user : userInstance.getFollowingList()){
             followingListModel.addElement(user.toString());
         }
     }
-
+    
+    /**Singleton Pattern */
     public void updateNewsFeed(){
         newsFeedModel.removeAllElements();
         for(X xMessage : userInstance.getNewsFeed().getRevOrdTweetList()){
@@ -120,6 +130,7 @@ public class UserView extends JFrame{
             if(!userInstance.getFollowingList().contains(followed)){
                 userInstance.followUser(userMap.get(followedUser));
                 followingListModel.add(0, followedUser);
+                updateLastUpdateTimeLabel();
             }
             else{
                 errorMessage = "You are already following this user.";
@@ -139,5 +150,29 @@ public class UserView extends JFrame{
             newsFeedModel.add(0, userInstance.getMostRecentX().toString());
         }
         userInstance.notifyObservers();
+        updateLastUpdateTimeLabel();
+    }
+
+    private void setLabels(){
+        StringBuilder creationTimeTxt = new StringBuilder();
+        creationTimeTxt.append("Time created: ");
+        creationTimeTxt.append(userInstance.getCreationTime());
+        creationTimeLabel = new JLabel(creationTimeTxt.toString());
+        lastUpdateTimeLabel = new JLabel("Time last updated: ");
+        lastUpdateTimeNumberLabel = new JLabel();
+
+        add(creationTimeLabel);
+        add(lastUpdateTimeLabel);
+        add(lastUpdateTimeNumberLabel);
+
+        creationTimeLabel.setBounds(20,20,150,20);
+        lastUpdateTimeLabel.setBounds(200,20,150, 20);
+        lastUpdateTimeNumberLabel.setBounds(300,20,150,20);
+    }
+
+    private void updateLastUpdateTimeLabel(){
+        StringBuilder timestampTxt = new StringBuilder();
+        timestampTxt.append(userInstance.getLastUpdateTime());
+        lastUpdateTimeNumberLabel.setText(timestampTxt.toString());
     }
 }

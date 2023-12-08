@@ -1,10 +1,17 @@
+/** 
+ * @ShurikenMonk(Emil Oliver Pabustan)
+ * Creates the framework of the project.
+ */
+
 import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.regex.Pattern;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
@@ -21,10 +28,12 @@ import javax.swing.tree.TreeSelectionModel;
 import javax.swing.WindowConstants;
 
 public class AdminPanel extends JFrame{
+    /**Singleton Pattern */
     private static AdminPanel adminInstance;
 
     protected static HashMap<String, Group> groups;
     protected static HashMap<String, User> users;
+    protected static PriorityQueue<User> lastUpdatedUsers = new PriorityQueue<>(new UserUpdateComparator());
 
     private DefaultMutableTreeNode root;
     private DefaultMutableTreeNode userViewSelection;
@@ -45,6 +54,8 @@ public class AdminPanel extends JFrame{
     private JButton countGroupsButton;
     private JButton openUserViewButton;
     private JButton percentPositiveButton;
+    private JButton validateButton;
+    private JButton checkLastUpdatedUserButton;
 
     private String newGroupName;
     private String newUserName;
@@ -55,6 +66,7 @@ public class AdminPanel extends JFrame{
     private static final int SCREEN_HEIGHT = 600;
     private static final int SCREEN_WIDTH = 800;
 
+    /**Singleton Pattern */
     private AdminPanel(){
         if(adminInstance == null){
             adminInstance = this;
@@ -85,6 +97,7 @@ public class AdminPanel extends JFrame{
         addUserButton.addActionListener(e -> {newUserName = addUserTextArea.getText();
         if(isAlphNum(newUserName)){addUser(newUserName);}else{errorMessage = "Username must be an alphanumeric string with a length of at least one."; JOptionPane.showMessageDialog(new JFrame(), errorMessage, "Error with Username", JOptionPane.ERROR_MESSAGE);}});
         
+        /**Composite Pattern */
         openUserViewButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent actEvent){
                 userViewSelection = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
@@ -98,6 +111,30 @@ public class AdminPanel extends JFrame{
         percentPositiveButton.addActionListener(e -> {double posPercent = calculatePositivePercent(); String posPercentFormat = String.format("%.1f", posPercent);
         if (Double.isNaN(posPercent)){JOptionPane.showMessageDialog(popUpFrame, "No xMessages currently posted, positive XMessage % cannot be calculated at this moment.");}
         else{JOptionPane.showMessageDialog(popUpFrame, "Positive XMessage Percentage: "+ posPercentFormat + "%.");}
+        });
+
+        validateButton.addActionListener(e -> {HashSet<String> namesSet = new HashSet<>();
+        for (String name : users.keySet()){
+            namesSet.add(name);
+        }
+        for (String name : groups.keySet()){
+            namesSet.add(name);
+        }
+        if(namesSet.size() == users.size() + groups.size()){
+            JOptionPane.showMessageDialog(popUpFrame, "All users and groups validated.");
+        }
+        else{
+            JOptionPane.showMessageDialog(popUpFrame, "There are at least two invalid usernames and or group names.");
+        }});
+
+        checkLastUpdatedUserButton.addActionListener(e -> {
+            if(users.size() == 0){
+                JOptionPane.showMessageDialog(popUpFrame, "There are no users.");
+            }
+            else{
+                String lastUpdatedUserName = lastUpdatedUsers.peek().getUser();
+                JOptionPane.showMessageDialog(popUpFrame, "Last Updated User: " + lastUpdatedUserName);
+            }
         });
     }
 
@@ -145,6 +182,8 @@ public class AdminPanel extends JFrame{
         countUsersButton = new JButton("Count Users");
         openUserViewButton = new JButton("Open User");
         percentPositiveButton = new JButton("Show Positive %");
+        validateButton = new JButton("Validate");
+        checkLastUpdatedUserButton = new JButton("Last Updated User");
 
         add(addGroupButton);
         add(addUserButton);
@@ -153,6 +192,8 @@ public class AdminPanel extends JFrame{
         add(countUsersButton);
         add(openUserViewButton);
         add(percentPositiveButton);
+        add(validateButton);
+        add(checkLastUpdatedUserButton);
 
         addGroupButton.setBounds(600, 20, 100, 50);
         addUserButton.setBounds(600, 75, 100, 50);
@@ -161,6 +202,8 @@ public class AdminPanel extends JFrame{
         countXsButton.setBounds(400, 350, 150, 50);
         countUsersButton.setBounds(400, 400, 150, 50);
         percentPositiveButton.setBounds(600, 350, 150, 50);
+        validateButton.setBounds(400, 300, 150, 50);
+        checkLastUpdatedUserButton.setBounds(600, 300, 150, 50);
     }
 
     private void setTree(){
@@ -202,6 +245,7 @@ public class AdminPanel extends JFrame{
         return s.length() > 0 && alnumPattern.matcher(s).find();
     }
 
+    /**Singleton Pattern */
     public static AdminPanel getAdmin(){
         if(adminInstance == null){
             adminInstance = new AdminPanel();
@@ -239,6 +283,7 @@ public class AdminPanel extends JFrame{
         }
     }
 
+    /**Composite Pattern */
     private void addUser(String name){
         if(!users.containsKey(name)){User newUser = new User(name);users.put(name, newUser);
         
@@ -282,5 +327,23 @@ public class AdminPanel extends JFrame{
 
     public HashMap<String, User> getUsers(){
         return users;
+    }
+
+    public PriorityQueue<User> getUserPriorityQueue(){
+        return lastUpdatedUsers;
+    }
+}
+
+/**new class UserUpdateComparator used for Most Recent Updated User Comparison for Assignment 3 */
+class UserUpdateComparator implements Comparator<User>{
+    @Override
+    public int compare(User p1, User p2){
+        if (p1.getLastUpdateTime() < p2.getLastUpdateTime()){
+            return 1;
+        }
+        else if(p1.getLastUpdateTime() > p2.getLastUpdateTime()){
+            return -1;
+        }
+        return 0;
     }
 }
